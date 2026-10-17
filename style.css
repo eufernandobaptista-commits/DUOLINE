@@ -1,0 +1,683 @@
+/* ==========================================================================
+   CONQUISTA DE LINHAS - ESTILOS GERAIS & TEMAS
+   ========================================================================== */
+
+:root {
+  --bg-color: #eef2f7;
+  --panel-bg: white;
+  --text-color: #333;
+  --primary: #3498db;
+  --grid-bg: #bdc3c7;
+  --cell-bg: white;
+  --hint-bg: #f8f9fa;
+  --cell-size: 20px;
+  --black: #202020;
+  --blue: #1764c0;
+  --red: #bb2525;
+}
+
+body.dark-theme {
+  --bg-color: #1a1a1a;
+  --panel-bg: #2d2d2d;
+  --text-color: #eee;
+  --grid-bg: #444;
+  --cell-bg: #333;
+  --hint-bg: #3d3d3d;
+  --black: #eee;
+  --blue: #72b6ff;
+  --red: #ff8a8a;
+}
+
+body.sepia-theme {
+  --bg-color: #f4ecd8;
+  --panel-bg: #fdf6e3;
+  --text-color: #5b4636;
+  --grid-bg: #d3c6aa;
+  --cell-bg: #fdf6e3;
+  --hint-bg: #eee8d5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Merriweather', Georgia, serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  transition: background 0.3s;
+}
+
+/* ==========================================================================
+   CABEÇALHO & PAINÉIS DE CONTROLE
+   ========================================================================== */
+
+.header {
+  text-align: center;
+  padding: 10px 5px;
+  background: var(--panel-bg);
+  width: 100%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.13);
+  z-index: 10;
+  position: sticky;
+  top: 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+h2 {
+  font-size: 19px;
+  margin: 0 0 14px;
+}
+
+.controls {
+  margin-top: 5px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tool-bar {
+  margin: 8px 0;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  background: var(--hint-bg);
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid var(--grid-bg);
+  flex-wrap: wrap;
+}
+
+button, select, input {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid var(--grid-bg);
+  font-size: 12px;
+  font-family: inherit;
+  background: var(--panel-bg);
+  color: var(--text-color);
+}
+
+button {
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(0.94);
+}
+
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+button:focus-visible, select:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.primary {
+  background: var(--primary);
+  color: white;
+  border: 0;
+}
+
+.tool-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.active {
+  background: #2c3e50 !important;
+  color: white !important;
+  border-color: #2c3e50 !important;
+}
+
+.stats {
+  font-size: 12px;
+  margin: 6px 0;
+  line-height: 1.6;
+}
+
+.players {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.player {
+  padding: 5px 12px;
+  border: 1px solid var(--grid-bg);
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.player.turn {
+  outline: 2px solid var(--primary);
+}
+
+.bank {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 6px 0;
+}
+
+.piece {
+  min-width: 39px;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 3px 7px;
+}
+
+.piece small {
+  display: block;
+  font-size: 10px;
+  font-weight: normal;
+}
+
+.black { color: var(--black); }
+.blue  { color: var(--blue); }
+.red   { color: var(--red); }
+
+/* ==========================================================================
+   TABULEIRO & CASAS DO JOGO
+   ========================================================================== */
+
+#game-viewport {
+  flex-grow: 1;
+  width: 100%;
+  display: flex;
+  padding: 10px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 160px;
+  align-items: flex-start;
+}
+
+.grid {
+  display: grid;
+  gap: 1px;
+  background: var(--grid-bg);
+  border: 1px solid var(--grid-bg);
+  margin: auto;
+  flex-shrink: 0;
+  outline: none;
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background: var(--cell-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--cell-size) * 0.6);
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-family: inherit;
+}
+
+.cell.hint {
+  background: var(--hint-bg);
+  font-size: calc(var(--cell-size) * 0.39);
+  color: var(--text-color);
+}
+
+.cell.hint.winning {
+  box-shadow: inset 0 0 0 2px rgba(39, 174, 96, 0.5);
+}
+
+.cell.focus-line {
+  background: color-mix(in srgb, var(--cell-bg), #3498db 17%);
+}
+
+.cell.last {
+  box-shadow: inset 0 0 0 2px #e5a622;
+}
+
+.cell.is-circled:after {
+  content: "";
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  border: 1.5px solid var(--text-color);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.cell.neutral {
+  color: #888;
+}
+
+.cell.chosen {
+  outline: 2px solid var(--primary);
+  z-index: 1;
+}
+
+footer {
+  font-size: 11px;
+  padding: 8px;
+  text-align: center;
+}
+
+/* ==========================================================================
+   MODAIS & COMPONENTES DIALOG
+   ========================================================================== */
+
+dialog {
+  background: var(--panel-bg);
+  color: var(--text-color);
+  border: 2px solid var(--primary);
+  border-radius: 15px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.25);
+  padding: 22px;
+  width: min(94vw, 550px);
+  max-height: 90vh;
+  overflow: auto;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+label.field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0;
+  font-size: 13px;
+}
+
+.note {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+
+td, th {
+  padding: 6px;
+  border-bottom: 1px solid var(--grid-bg);
+  text-align: center;
+}
+
+details {
+  font-size: 12px;
+  text-align: center;
+  margin: 4px;
+}
+
+#toast {
+  min-height: 18px;
+  font-size: 12px;
+}
+
+#zoomLabel {
+  font-size: 12px;
+  align-self: center;
+}
+
+/* ==========================================================================
+   PAINEL COMPACTO (DESKTOP)
+   ========================================================================== */
+
+#compactPanel {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  #compactPanel {
+    display: inline-block;
+  }
+  .header.compact-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 10px;
+    align-items: center;
+    padding: 6px 10px;
+  }
+  .header.compact-panel > h1,
+  .header.compact-panel > .controls,
+  .header.compact-panel > details,
+  .header.compact-panel > #toast {
+    display: none;
+  }
+  .header.compact-panel > .players {
+    grid-column: 1;
+    grid-row: 1;
+    justify-content: center;
+  }
+  .header.compact-panel > .bank {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    flex-wrap: nowrap;
+  }
+  .header.compact-panel .piece {
+    font-size: 16px;
+    min-width: 36px;
+    padding: 4px 6px;
+  }
+  .header.compact-panel .piece small {
+    display: inline;
+    font-size: 10px;
+    margin-left: 3px;
+  }
+  .header.compact-panel > .tool-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0;
+    padding: 3px;
+  }
+  .header.compact-panel > .stats {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
+   BARRA DE REVISÃO E HISTÓRICO
+   ========================================================================== */
+
+.review-bar {
+  padding: 5px;
+  background: var(--hint-bg);
+  border: 1px solid var(--grid-bg);
+  border-radius: 5px;
+  font-size: 12px;
+}
+
+.review-bar[hidden] {
+  display: none !important;
+}
+
+#reviewLabel {
+  max-width: 100%;
+  line-height: 1.5;
+}
+
+@media (min-width: 901px) {
+  .header.compact-panel > .review-bar:not([hidden]) {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+}
+
+/* ==========================================================================
+   ARENA, RELÓGIOS & TORNEIO
+   ========================================================================== */
+
+.arena-bar {
+  margin: 6px auto;
+  max-width: 680px;
+  font-size: 12px;
+}
+
+.clock-board {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.clock-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 130px;
+  padding: 7px 12px;
+  border: 1px solid var(--grid-bg);
+  border-radius: 8px;
+  background: var(--hint-bg);
+}
+
+.clock-card strong {
+  font: 700 23px monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-card small {
+  font-size: 10px;
+}
+
+.active-clock {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 0 1px var(--primary);
+}
+
+.arena-card {
+  padding: 12px;
+  margin: 9px 0;
+  border: 1px solid var(--grid-bg);
+  border-radius: 9px;
+  background: var(--hint-bg);
+  font-size: 13px;
+}
+
+.arena-card p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 7px 0;
+}
+
+.arena-card button {
+  display: block;
+  margin-top: 9px;
+}
+
+.roster-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 10px 0;
+  padding: 9px;
+  background: var(--hint-bg);
+  border-radius: 8px;
+}
+
+.roster-row input {
+  width: 100%;
+  min-width: 0;
+}
+
+.roster-row select {
+  flex: 1;
+  min-width: 0;
+}
+
+.table-scroll {
+  overflow: auto;
+}
+
+.champion {
+  padding: 12px;
+  background: var(--hint-bg);
+  border-radius: 8px;
+}
+
+.field input, .field select {
+  max-width: 65%;
+  min-width: 0;
+}
+
+#arenaContext {
+  font-size: 11px;
+}
+
+#arenaBar[hidden] {
+  display: none;
+}
+
+@media (min-width: 901px) {
+  .header.compact-panel > .arena-bar {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    margin: 0;
+    max-width: none;
+  }
+  .header.compact-panel .clock-board {
+    display: inline-flex;
+  }
+  .header.compact-panel .clock-card {
+    padding: 2px 10px;
+    flex-direction: row;
+    align-items: center;
+  }
+  .header.compact-panel .clock-card strong {
+    font-size: 17px;
+  }
+  .header.compact-panel .arena-bar > .controls {
+    display: inline-flex;
+    margin-left: 10px;
+  }
+}
+
+/* ==========================================================================
+   ESTILOS DAS SALAS ONLINE (FIREBASE)
+   ========================================================================== */
+
+#onlineDialog {
+  width: min(96vw, 760px);
+}
+
+.online-banner {
+  padding: 12px;
+  border: 1px solid var(--primary);
+  border-radius: 9px;
+  background: var(--hint-bg);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.online-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0;
+  flex-wrap: wrap;
+}
+
+.online-tabs button {
+  flex: 1;
+  min-width: 105px;
+  padding: 9px;
+}
+
+.online-card {
+  border: 1px solid var(--grid-bg);
+  border-radius: 10px;
+  padding: 13px;
+  margin: 10px 0;
+  background: var(--hint-bg);
+}
+
+.online-card h3 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.online-card p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.online-chip {
+  font-size: 11px;
+  border: 1px solid var(--grid-bg);
+  border-radius: 20px;
+  padding: 3px 8px;
+  display: inline-block;
+  margin: 3px;
+}
+
+.online-seat {
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid var(--grid-bg);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.online-empty {
+  text-align: center;
+  padding: 22px;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+#onlineStatus {
+  min-height: 20px;
+  margin: 12px 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+#onlineFilter, #onlineInvite {
+  width: 100%;
+  padding: 9px;
+}
+
+#onlineStrip {
+  padding: 7px;
+  font-size: 12px;
+  background: var(--hint-bg);
+  border-top: 1px solid var(--grid-bg);
+  width: 100%;
+  text-align: center;
+}
+
+#onlineStrip button {
+  margin: 3px;
+}
+
+#onlineDialog input {
+  max-width: 100%;
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE (MOBILE & DISPOSITIVOS MENORES)
+   ========================================================================== */
+
+@media (max-width: 600px) {
+  h1 { font-size: 18px; }
+  .tool-btn { padding: 5px 8px; font-size: 11px; }
+  .player { padding: 4px 6px; }
+  .header { position: relative; }
+  .piece { min-width: 31px; padding: 3px 5px; }
+}
+
+@media (max-width: 420px) {
+  dialog { padding: 15px; }
+  .clock-card { min-width: 0; flex: 1; }
+  .clock-card strong { font-size: 21px; }
+  .controls button { font-size: 11px; }
+}
+
+[hidden] {
+  display: none !important;
+}

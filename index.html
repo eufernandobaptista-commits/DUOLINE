@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes">
+  <title>Conquista de Linhas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="header">
+  <h1>Conquista de Linhas</h1>
+  <div class="controls">
+    <select id="theme" aria-label="Tema">
+      <option value="light">Claro</option>
+      <option value="dark">Escuro</option>
+      <option value="sepia">Sépia</option>
+    </select>
+    <button id="roomsBtn">Salas online</button>
+    <button id="profileBtn">Meu perfil</button>
+    <button id="campaignBtn">Campanha</button>
+    <button id="tournamentBtn">Torneios</button>
+    <button class="primary" id="new">Novo jogo</button>
+    <button id="aiSettingsBtn">Perfil da IA</button>
+    <button id="rulesBtn">Regras</button>
+    <button id="duelsBtn">Disputas</button>
+    <button id="save">Salvar partida</button>
+    <button id="load">Abrir partida</button>
+    <button id="reviewBtn" disabled>Rever partida</button>
+    <input hidden type="file" id="file" accept="application/json,.json">
+  </div>
+  <div class="tool-bar">
+    <button class="tool-btn active" id="pen">🖊️ Jogar</button>
+    <button class="tool-btn" id="circle">⭕ Circular</button>
+    <button class="tool-btn" id="erase">🧹 Apagar círculo</button>
+    <button class="tool-btn" id="clear">Limpar círculos</button>
+    <button class="tool-btn" id="less" aria-label="Diminuir zoom">−</button>
+    <span id="zoomLabel">100%</span>
+    <button class="tool-btn" id="more" aria-label="Aumentar zoom">+</button>
+    <button class="tool-btn" id="fit">Ajustar</button>
+    <button class="tool-btn" id="compactPanel" aria-expanded="true" title="Recolher as informações para liberar espaço para o tabuleiro">↑ Recolher painel</button>
+  </div>
+  <div id="reviewBar" class="controls review-bar" hidden>
+    <button id="reviewFirst" aria-label="Ir ao início" title="Início">⏮</button>
+    <button id="reviewPrev" aria-label="Jogada anterior" title="Anterior (←)">◀</button>
+    <span id="reviewLabel" aria-live="polite"></span>
+    <button id="reviewNext" aria-label="Próxima jogada" title="Próxima (→)">▶</button>
+    <button id="reviewLast" aria-label="Ir ao fim" title="Fim">⏭</button>
+    <button id="reviewExit">Voltar à partida</button>
+  </div>
+  <div id="arenaBar" class="arena-bar">
+    <div id="clockBoard" class="clock-board"></div>
+    <div class="controls">
+      <span id="arenaContext"></span>
+      <button id="pauseGame">Pausar</button>
+      <span id="spectatorCountdown"></span>
+      <button id="nextChallenge" hidden>Próximo desafio</button>
+    </div>
+  </div>
+  <div class="players" id="players"></div>
+  <div class="stats" id="status" role="status" aria-live="polite">Configure sua partida para começar.</div>
+  <div class="bank" id="bank"></div>
+  <details><summary>Reserva dos dois jogadores</summary><div id="reserves"></div></details>
+  <div id="toast" aria-live="polite"></div>
+</header>
+
+<div id="onlineStrip" hidden>
+  <span id="onlineMatchInfo"></span>
+  <button id="onlineRoomBack">Sala / convite</button>
+  <button id="onlineResign">Desistir</button>
+  <button id="onlineLeaveView">Voltar ao jogo local</button>
+</div>
+
+<main id="game-viewport">
+  <div id="grid" class="grid" role="group" aria-label="Tabuleiro"></div>
+</main>
+<footer>Selecione uma ficha e toque numa casa vazia. Teclas 1–9 selecionam fichas. Clique nas somas para destacar uma disputa.</footer>
+
+<!-- Modais do Jogo -->
+<dialog id="profileDialog">
+  <h2>Seu perfil</h2>
+  <label class="field">Nome<input id="profileName" maxlength="28" placeholder="Seu nome"></label>
+  <label class="field">Avatar<select id="profileAvatar"><option>♟</option><option>🦊</option><option>🐺</option><option>🦉</option><option>🐉</option><option>🦁</option></select></label>
+  <label class="field">Cor favorita<select id="profileColor"><option value="black">Preto</option><option value="blue">Azul</option><option value="red">Vermelho</option></select></label>
+  <div id="profileStats" class="note"></div>
+  <div class="controls">
+    <button id="saveProfile" class="primary">Salvar perfil</button>
+    <button id="backupArena">Exportar progresso</button>
+    <button id="restoreArena">Importar progresso</button>
+    <input id="arenaFile" type="file" accept=".json" hidden>
+    <button data-close>Fechar</button>
+  </div>
+  <p class="note">Perfil, campanha e torneio ficam neste navegador. Exporte seu progresso para guardar uma cópia ou levar para outro aparelho.</p>
+</dialog>
+
+<dialog id="campaignDialog">
+  <h2>Caminho do Conquistador</h2>
+  <p class="note">Oito adversários progressivos. Vença para liberar a próxima etapa.</p>
+  <label class="field">Tempo principal<select id="campaignTime"><option value="0">Sem relógio</option><option value="5">5 minutos</option><option value="10" selected>10 minutos</option><option value="20">20 minutos</option><option value="30">30 minutos</option></select></label>
+  <div id="campaignList"></div>
+  <div class="controls"><button data-close>Fechar</button></div>
+</dialog>
+
+<dialog id="tournamentDialog">
+  <h2>Arena de torneios</h2>
+  <div id="tournamentSetup">
+    <label class="field">Participantes<select id="tournamentCount"><option value="4">4 participantes</option><option value="8">8 participantes</option></select></label>
+    <label class="field">Sua participação<select id="tournamentHuman"><option value="yes">Eu jogo + IAs</option><option value="no">Somente IAs</option></select></label>
+    <label class="field">Tabuleiro<select id="tournamentSize"></select></label>
+    <label class="field">Tempo principal<select id="tournamentTime"><option value="0">Sem relógio</option><option value="5">5 minutos</option><option value="10" selected>10 minutos</option><option value="20">20 minutos</option><option value="30">30 minutos</option></select></label>
+    <div id="tournamentRoster"></div>
+    <button id="createTournament" class="primary">Criar liga</button>
+  </div>
+  <div id="tournamentCurrent"></div>
+  <div class="controls"><button data-close>Fechar</button></div>
+</dialog>
+
+<dialog id="setup">
+  <h2>Nova conquista</h2>
+  <label class="field">Tabuleiro<select id="size"></select></label>
+  <label class="field">Modo<select id="mode"><option value="ai">Você × IA</option><option value="local">Jogador × Jogador local</option><option value="spectator">IA × IA · espectador</option></select></label>
+  <div id="aiSetupFields">
+    <label class="field">Dificuldade<select id="setupAILevel"><option value="beginner">Iniciante</option><option value="easy">Fácil</option><option value="medium">Intermediário</option><option value="hard">Difícil</option><option value="master">Mestre · IA original</option></select></label>
+    <label class="field">Estilo de jogo<select id="setupAIStyle"><option value="standard">Padrão</option><option value="defensive">Defensivo</option><option value="aggressive">Agressivo</option><option value="opportunist">Oportunista</option><option value="expansive">Expansionista</option><option value="positional">Posicional</option><option value="economist">Econômico</option><option value="unpredictable">Imprevisível</option></select></label>
+    <p class="note" id="setupAIHelp" aria-live="polite"></p>
+  </div>
+  <label class="field" id="opponentNameField">Nome da IA / IA 2<input id="opponentName" value="Atlas" maxlength="28"></label>
+  <div id="spectatorSettings" hidden>
+    <label class="field">Nome da IA 1<input id="spectatorName" value="Aurora" maxlength="28"></label>
+    <label class="field">Dificuldade da IA 1<select id="spectatorLevel"></select></label>
+    <label class="field">Estilo da IA 1<select id="spectatorStyle"></select></label>
+  </div>
+  <label class="field" id="localNameField">Nome do jogador 2 local<input id="localName" value="Jogador 2" maxlength="28"></label>
+  <label class="field">Tempo por jogador<select id="timeControl"><option value="0">Sem relógio</option><option value="1">1 minuto</option><option value="3">3 minutos</option><option value="5">5 minutos</option><option value="10" selected>10 minutos</option><option value="15">15 minutos</option><option value="20">20 minutos</option><option value="30">30 minutos</option><option value="60">60 minutos</option></select></label>
+  <label class="field">Sua cor / Jogador 1<select id="color1"><option value="black">Preto</option><option value="blue">Azul</option><option value="red">Vermelho</option></select></label>
+  <label class="field" id="color2Field">Cor do Jogador 2<select id="color2"><option value="blue">Azul</option><option value="red">Vermelho</option><option value="black">Preto</option></select></label>
+  <p id="setupError" role="alert"></p>
+  <div class="controls"><button id="start" class="primary">Sortear e iniciar</button><button id="cancel">Cancelar</button></div>
+</dialog>
+
+<dialog id="aiSettings">
+  <h2>Seu adversário de treino</h2>
+  <label class="field">Dificuldade<select id="liveAILevel"><option value="beginner">Iniciante</option><option value="easy">Fácil</option><option value="medium">Intermediário</option><option value="hard">Difícil</option><option value="master">Mestre · IA original</option></select></label>
+  <label class="field">Estilo de jogo<select id="liveAIStyle"><option value="standard">Padrão</option><option value="defensive">Defensivo</option><option value="aggressive">Agressivo</option><option value="opportunist">Oportunista</option><option value="expansive">Expansionista</option><option value="positional">Posicional</option><option value="economist">Econômico</option><option value="unpredictable">Imprevisível</option></select></label>
+  <p class="note" id="liveAIHelp" aria-live="polite"></p>
+  <div class="controls"><button id="applyAI" class="primary">Aplicar perfil</button><button id="closeAI">Cancelar</button></div>
+</dialog>
+
+<dialog id="rules">
+  <h2>Como jogar</h2>
+  <div class="note">
+    <p>Um jogador controla as horizontais (H) e o outro, as verticais (V). Compare a soma da linha i com a coluna i.</p>
+  </div>
+  <button onclick="this.closest('dialog').close()">Entendi</button>
+</dialog>
+
+<dialog id="duels"><h2 id="duelsTitle">Disputas</h2><div id="duelsBody"></div><button onclick="this.closest('dialog').close()">Fechar</button></dialog>
+
+<dialog id="onlineDialog" aria-labelledby="onlineTitle">
+  <h2 id="onlineTitle">Salas online</h2>
+  <div class="online-banner" id="onlineConnection">Carregando a conexão com o Firebase…</div>
+  <div class="controls"><button id="onlineGoogle" class="primary" disabled>Entrar com Google</button><span id="onlineIdentity" class="note"></span><button id="onlineLogout" hidden>Sair da conta</button></div>
+  <nav class="online-tabs"><button data-online-tab="public">Salas públicas</button><button data-online-tab="create">Criar sala</button><button data-online-tab="mine">Minhas salas</button><button data-online-tab="invite">Entrar por convite</button></nav>
+  <section id="online-public"><input id="onlineFilter" aria-label="Buscar salas" placeholder="Buscar sala ou anfitrião…"><div id="onlinePublicList"></div></section>
+  <section id="online-create" hidden>
+    <form id="onlineCreateForm">
+      <label class="field">Nome da sala<input id="onlineRoomName" maxlength="50" required placeholder="Uma partida tranquila"></label>
+      <label class="field">Seu apelido<input id="onlineNickname" maxlength="28" required></label>
+      <label class="field">Visibilidade<select id="onlineVisibility"><option value="public">Pública</option><option value="private">Privada</option></select></label>
+      <label class="field">Tabuleiro<select id="onlineSize"></select></label>
+      <label class="field">Tempo por jogador<select id="onlineMinutes"><option value="0">Sem relógio</option><option value="5">5 minutos</option><option value="10" selected>10 minutos</option></select></label>
+      <button id="onlineCreate" class="primary" type="submit" disabled>Criar sala</button>
+    </form>
+  </section>
+  <section id="online-mine" hidden><div id="onlineMineList"></div></section>
+  <section id="online-invite" hidden><label class="field">Código ou link<input id="onlineJoinInput" maxlength="1000" placeholder="Cole o convite"></label><button id="onlineJoin" class="primary" disabled>Entrar na sala</button></section>
+  <section id="online-waiting" hidden><div id="onlineWaiting"></div></section>
+  <div id="onlineStatus" role="status" aria-live="polite"></div>
+  <div class="controls"><button id="onlineClose">Voltar ao tabuleiro</button><button id="onlineReloadSdk" hidden>Tentar conexão novamente</button></div>
+</dialog>
+
+<!-- Carrega a aplicação via módulo padrão moderno sem Node.js -->
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
